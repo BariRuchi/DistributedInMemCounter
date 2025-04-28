@@ -62,7 +62,7 @@ func MonitorHeartbeats(s *models.Server) {
 				if !ok {
 					peersState[peer] = &peerState{}
 				}
-				checkHeartbeat(s, peer)
+				go checkHeartbeat(s, peer)
 			}
 
 		}
@@ -111,10 +111,10 @@ func handleHeartbeatResult(s *models.Server, peer string, success bool, conn *gr
 		if state.dead {
 			log.Printf("Peer %s healed", peer)
 			state.dead = false
-
+			s.Mu.Lock()
 			s.Peers = append(s.Peers, peer)
 			s.DeadPeers = arrays.Remove(s.DeadPeers, peer)
-
+			s.Mu.Unlock()
 			// Execute all registered recovery actions
 			for _, action := range recoveryActions {
 				action.Execute(s, peer)
@@ -126,9 +126,10 @@ func handleHeartbeatResult(s *models.Server, peer string, success bool, conn *gr
 		if !state.dead {
 			log.Printf("Marking %s as dead", peer)
 			state.dead = true
-
+			s.Mu.Lock()
 			s.Peers = arrays.Remove(s.Peers, peer)
 			s.DeadPeers = append(s.DeadPeers, peer)
+			s.Mu.Unlock()
 			// Close the connection as the peer is dead
 			closeConnection(s, peer, conn)
 		}
