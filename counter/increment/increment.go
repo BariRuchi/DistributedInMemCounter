@@ -16,7 +16,7 @@ func PropagateIncrement(s *models.Server, opID string) {
 			continue
 		}
 
-		func(p string) {
+		go func(p string) {
 			conn := s.GetOrCreateConnection(peer)
 			client := pb.NewDiscoveryClient(conn)
 			ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
