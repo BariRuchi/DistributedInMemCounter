@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package discovery;
+option go_package = "./proto";
+
+service Discovery {
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  rpc GetPeers(Empty) returns (PeersResponse);
+  rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
+  rpc PropagateIncrement(IncrementRequest) returns (IncrementResponse);
+  rpc GetCounter(Empty) returns (CounterResponse);
+}
+
+
+
+message CounterResponse {
+  int64 counter = 1;
+}
+
+
+message RegisterRequest {
+  string id = 1;
+}
+
+message RegisterResponse {
+  repeated string peers = 1;
+}
+
+message HeartbeatRequest {
+  string id = 1;
+}
+
+message HeartbeatResponse {
+  bool alive = 1;
+}
+
+message PeersResponse {
+  repeated string peers = 1;
+}
+
+message Empty {}
+
+message IncrementRequest {
+  string id = 1; // Unique ID for the operation (deduplication)
+}
+
+message IncrementResponse {
+  bool success = 1;
+}
