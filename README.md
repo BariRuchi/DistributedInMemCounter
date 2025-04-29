@@ -82,8 +82,6 @@ Tests cover:
 - **Strong consistency is not guaranteed**: The system achieves *eventual* consistency but temporary divergence is possible.
 - **Partition detection is heartbeat-based**: False positives (temporary lag or network jitter) can cause unnecessary peer removal.
 - **Single point retries**: Retries are initiated by the sender only; missed operations may require additional sync.
-- **No external distributed consensus** (like Raft/Paxos) is used — lightweight but weaker guarantees.
-
 ---
 
 ## Directory Structure

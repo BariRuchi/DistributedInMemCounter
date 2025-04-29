@@ -42,16 +42,18 @@ func StartClient(s *models.Server, initialPeers []string) {
 			return
 		}
 
+		// Sync counter with all known peers
+		for _, p := range resp.Peers {
+			if !arrays.Contains(s.Peers, p) {
+				sync.SyncCounterFromPeer(s, client, p)
+			}
+		}
+
 		// Lock and update the peer list
 		s.Mu.Lock()
 		s.Peers = arrays.AppendUnique(s.Peers, addr)
 		s.Peers = arrays.AppendUnique(s.Peers, resp.Peers...)
 		s.Mu.Unlock()
-
-		// Sync counter with all known peers
-		for _, p := range resp.Peers {
-			sync.SyncCounterFromPeer(s, client, p)
-		}
 
 		// Recursively register with discovered peers
 		for _, p := range resp.Peers {
