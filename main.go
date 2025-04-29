@@ -4,7 +4,7 @@ import (
 	"discovery-service/discovery/client"
 	"discovery-service/models"
 	"discovery-service/proto"
-	"discovery-service/web/web"
+	"discovery-service/web"
 	"flag"
 	"google.golang.org/grpc"
 	"log"

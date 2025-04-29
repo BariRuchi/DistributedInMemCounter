@@ -5,7 +5,7 @@ import (
 	"discovery-service/discovery/client"
 	"discovery-service/models"
 	"discovery-service/proto"
-	"discovery-service/web/web"
+	"discovery-service/web"
 	"google.golang.org/grpc"
 	"log"
 	"net"
