@@ -35,7 +35,7 @@ func (s *Server) GetOrCreateConnection(peer string) *grpc.ClientConn {
 	var conn *grpc.ClientConn
 	var err error
 	for attempt := 0; attempt < 5; attempt++ {
-		conn, err = grpc.Dial(peer, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		conn, err = grpc.NewClient(peer, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err == nil {
 			s.Mu.Lock()
 			s.ConnPool[peer] = conn
