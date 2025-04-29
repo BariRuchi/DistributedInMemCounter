@@ -25,6 +25,24 @@ This project implements a basic distributed counter system using gRPC for commun
 
 ## How to Run Nodes
 
+**GRPC file generate command**
+- Install `protoc` (Protocol Buffers Compiler)
+
+  **On MacOS**:
+  ```bash
+  brew install protobuf
+  
+- Install Go plugins for protoc
+  ```bash
+  go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+  go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+
+- To generate Go code from the .proto file, run:
+
+  ```bash 
+  protoc --go_out=. --go-grpc_out=. discovery.proto
+
+
 1. **Start Multiple Nodes**
 
 ```bash
