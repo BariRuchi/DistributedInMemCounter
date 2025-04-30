@@ -43,9 +43,7 @@ func StartHTTPServer(s *models.Server, grpcPort string) {
 	})
 
 	mux.HandleFunc("/count", func(w http.ResponseWriter, r *http.Request) {
-		s.Mu.Lock()
 		count := s.Counter
-		s.Mu.Unlock()
 
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]int64{
