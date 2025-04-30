@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	MaxRetries      = 2
+	MaxRetries      = 5
 	BaseBackoff     = time.Second
 	heartbeatPeriod = 5 * time.Second
 )
