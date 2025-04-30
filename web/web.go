@@ -5,12 +5,11 @@ import (
 	"discovery-service/models"
 	"encoding/json"
 	"fmt"
+	"github.com/google/uuid"
 	"log"
-	"math/rand/v2"
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 )
 
 func StartHTTPServer(s *models.Server, grpcPort string) {
@@ -27,7 +26,7 @@ func StartHTTPServer(s *models.Server, grpcPort string) {
 	})
 
 	mux.HandleFunc("/increment", func(w http.ResponseWriter, r *http.Request) {
-		opID := fmt.Sprintf("%d-%d", time.Now().UnixNano(), rand.Int())
+		opID := uuid.New().String()
 
 		s.Mu.Lock()
 		s.Counter++
