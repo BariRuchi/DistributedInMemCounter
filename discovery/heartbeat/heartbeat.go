@@ -62,7 +62,7 @@ func MonitorHeartbeats(s *models.Server) {
 				if !ok {
 					peersState[peer] = &peerState{}
 				}
-				go checkHeartbeat(s, peer)
+				checkHeartbeat(s, peer)
 			}
 
 		}

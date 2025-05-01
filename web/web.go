@@ -12,8 +12,8 @@ import (
 	"strings"
 )
 
-func StartHTTPServer(s *models.Server, grpcPort string) {
-	httpPort := computeHTTPPort(grpcPort)
+func StartHTTPServer(s *models.Server, grpcPort string) http.Handler {
+	httpPort := ComputeHTTPPort(grpcPort)
 	mux := http.NewServeMux()
 	mux.HandleFunc("/peers", func(w http.ResponseWriter, r *http.Request) {
 		s.Mu.Lock()
@@ -28,14 +28,11 @@ func StartHTTPServer(s *models.Server, grpcPort string) {
 	mux.HandleFunc("/increment", func(w http.ResponseWriter, r *http.Request) {
 		opID := uuid.New().String()
 
-		s.Mu.Lock()
-		s.Counter++
-		if s.SeenOps == nil {
-			s.SeenOps = make(map[string]bool)
-		}
-		s.SeenOps[opID] = true
-		s.Mu.Unlock()
-
+		//s.Mu.Lock()
+		//s.Counter++
+		//s.SeenOps[opID] = true
+		//s.Mu.Unlock()
+		s.IncrementChan <- opID
 		increment.PropagateIncrement(s, opID)
 
 		w.WriteHeader(http.StatusOK)
@@ -52,14 +49,23 @@ func StartHTTPServer(s *models.Server, grpcPort string) {
 	})
 
 	go func() {
+		for opId := range s.IncrementChan {
+			s.SeenOps[opId] = true
+			s.Counter++
+		}
+	}()
+
+	go func() {
 		log.Printf("HTTP server listening on %s", httpPort)
 		if err := http.ListenAndServe(httpPort, mux); err != nil {
 			log.Fatalf("HTTP server failed: %v", err)
 		}
 	}()
+
+	return mux
 }
 
-func computeHTTPPort(grpcPort string) string {
+func ComputeHTTPPort(grpcPort string) string {
 	p := strings.TrimPrefix(grpcPort, ":")
 	portNum, err := strconv.Atoi(p)
 	if err != nil {

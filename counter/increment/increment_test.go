@@ -18,7 +18,7 @@ func startTestNode(t *testing.T, port string, initialPeers []string) {
 	t.Helper()
 
 	nodeID := "localhost:" + port
-	s := &models.Server{Id: nodeID, Peers: []string{nodeID}}
+	s := models.NewServer(nodeID)
 	client.StartClient(s, initialPeers)
 
 	lis, err := net.Listen("tcp", ":"+port)
@@ -39,7 +39,7 @@ func TestRealIncrementPropagation(t *testing.T) {
 	go startTestNode(t, "8081", []string{"localhost:8080"})
 
 	// Give time for discovery and setup
-	time.Sleep(5 * time.Second)
+	time.Sleep(10 * time.Second)
 
 	// Make an increment request on node1
 	resp, err := http.Get("http://localhost:9080/increment")
@@ -83,7 +83,7 @@ func TestParallelIncrementPropagation(t *testing.T) {
 	go startTestNode(t, "8081", []string{"localhost:8080"})
 
 	// Give time for discovery and setup
-	time.Sleep(5 * time.Second)
+	time.Sleep(10 * time.Second)
 
 	// Number of parallel increments you want
 	const numIncrements = 50

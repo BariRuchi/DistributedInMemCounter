@@ -17,7 +17,7 @@ func startTestNode(t *testing.T, port string, initialPeers []string) {
 	t.Helper()
 
 	nodeID := "localhost:" + port
-	s := &models.Server{Id: nodeID, Peers: []string{nodeID}}
+	s := models.NewServer(nodeID)
 	client.StartClient(s, initialPeers)
 
 	lis, err := net.Listen("tcp", ":"+port)

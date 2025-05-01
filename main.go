@@ -20,7 +20,7 @@ func main() {
 	nodeID := "localhost:" + *port
 	initialPeers := strings.Split(*peers, ",")
 
-	s := &models.Server{Id: nodeID, Peers: []string{nodeID}}
+	s := models.NewServer(nodeID)
 	client.StartClient(s, initialPeers)
 
 	lis, err := net.Listen("tcp", ":"+*port)

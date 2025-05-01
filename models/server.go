@@ -13,15 +13,16 @@ import (
 
 type Server struct {
 	pb.UnimplementedDiscoveryServer
-	Id          string
-	Peers       []string
-	DeadPeers   []string
-	Mu          sync.Mutex
-	Counter     int64
-	MissedOps   map[string][]string // new field
-	Partitioned bool
-	SeenOps     map[string]bool             // For deduplication
-	ConnPool    map[string]*grpc.ClientConn // Pool for active peer connections
+	Id            string
+	Peers         []string
+	DeadPeers     []string
+	Mu            sync.Mutex
+	Counter       int64
+	MissedOps     map[string][]string // new field
+	Partitioned   bool
+	SeenOps       map[string]bool             // For deduplication
+	ConnPool      map[string]*grpc.ClientConn // Pool for active peer connections
+	IncrementChan chan string
 }
 
 func (s *Server) GetOrCreateConnection(peer string) *grpc.ClientConn {
@@ -64,14 +65,14 @@ func (s *Server) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.Reg
 	}
 
 	// Return the updated list of peers
-	return &pb.RegisterResponse{Peers: s.Peers}, nil
+	return &pb.RegisterResponse{Peers: append(s.Peers, s.DeadPeers...)}, nil
 }
 
 // GetPeers returns the list of peers.
 func (s *Server) GetPeers(ctx context.Context, _ *pb.Empty) (*pb.PeersResponse, error) {
 	s.Mu.Lock()
 	defer s.Mu.Unlock()
-	return &pb.PeersResponse{Peers: s.Peers}, nil
+	return &pb.PeersResponse{Peers: append(s.Peers, s.DeadPeers...)}, nil
 }
 
 // Heartbeat checks if the peer is alive.
@@ -92,8 +93,9 @@ func (s *Server) PropagateIncrement(ctx context.Context, req *pb.IncrementReques
 		return &pb.IncrementResponse{Success: true}, nil
 	}
 
-	s.Counter++
-	s.SeenOps[req.Id] = true
+	s.IncrementChan <- req.Id
+	//s.Counter++
+	//s.SeenOps[req.Id] = true
 
 	log.Printf("Counter incremented via propagation: %d", s.Counter)
 	return &pb.IncrementResponse{Success: true}, nil
@@ -103,4 +105,13 @@ func (s *Server) GetCounter(ctx context.Context, _ *pb.Empty) (*pb.CounterRespon
 	s.Mu.Lock()
 	defer s.Mu.Unlock()
 	return &pb.CounterResponse{Counter: s.Counter}, nil
+}
+
+func NewServer(nodeId string) *Server {
+	s := new(Server)
+	s.Id = nodeId
+	s.Peers = []string{nodeId}
+	s.SeenOps = make(map[string]bool)
+	s.IncrementChan = make(chan string)
+	return s
 }
